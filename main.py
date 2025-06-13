@@ -6,7 +6,7 @@ st.set_page_config(page_title="Evaluación de habilidades", layout="centered")
 
 st.title("HERRAMIENTA DE EVALUACIÓN")
 
-st.markdown("**Escala Likert:**  
+st.markdown("Escala Likert:  
 1 = Totalmente en desacuerdo  
 2 = Parcialmente en desacuerdo  
 3 = Indiferente  

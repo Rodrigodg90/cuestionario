@@ -2,17 +2,60 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-st.set_page_config(page_title="Examen Unidad 1", layout="centered")
 
+
+st.set_page_config(page_title="Examen Unidad 1", layout="centered")
 st.title("Examen Unidad 1 – Fundamentos de Programación Orientada a Objetos")
 st.write("**Profesor:** Dr. Rodrigo Delgadillo Gaytán")
+
+# Variables de sesión
+if "usuario_tipo" not in st.session_state:
+    st.session_state.usuario_tipo = None
+
+# Inicio de sesión
+if st.session_state.usuario_tipo is None:
+    st.subheader("Inicio de sesión")
+
+    tipo = st.radio("¿Cómo deseas ingresar?", ["Alumno", "Profesor"])
+
+    if tipo == "Profesor":
+        usuario = st.text_input("Usuario")
+        contraseña = st.text_input("Contraseña", type="password")
+        if st.button("Ingresar como Profesor"):
+            if usuario == "axolote" and contraseña == "xoloit":
+                st.session_state.usuario_tipo = "profesor"
+                st.success("¡Bienvenido, profesor!")
+            else:
+                st.error("Usuario o contraseña incorrectos.")
+    else:
+        nombre = st.text_input("Ingresa tu nombre completo:")
+        if nombre and st.button("Ingresar al examen"):
+            st.session_state.usuario_tipo = "alumno"
+            st.session_state.nombre_alumno = nombre
+            st.success(f"¡Bienvenido/a, {nombre}!")
+
+elif st.session_state.usuario_tipo == "profesor":
+    st.success("Has ingresado como profesor.")
+    st.write("Aquí puedes revisar los resultados o agregar herramientas para evaluación.")
+    # Aquí puedes cargar el archivo con respuestas:
+    import os
+    if os.path.exists("respuestas_examen.csv"):
+        df = pd.read_csv("respuestas_examen.csv")
+        st.dataframe(df)
+    else:
+        st.info("Aún no hay respuestas registradas.")
+    # Puedes agregar un botón para cerrar sesión
+    if st.button("Cerrar sesión"):
+        st.session_state.usuario_tipo = None
+
+elif st.session_state.usuario_tipo == "alumno":
+    nombre = st.session_state.nombre_alumno
+    st.success(f"¡Bienvenido/a, {nombre}! A continuación, responde el examen:")
+
 
 # Verificación de sesión para envío único
 if 'enviado' not in st.session_state:
     st.session_state['enviado'] = False
-
-# Nombre del alumno
-nombre = st.text_input("Ingresa tu nombre completo para comenzar el examen:")
 
 if nombre:
     st.success("¡Bienvenido/a, {}! A continuación, responde el examen:".format(nombre))

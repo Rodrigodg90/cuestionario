@@ -1,85 +1,131 @@
 import streamlit as st
 import pandas as pd
-import os
+from datetime import datetime
 
-# --- CONFIGURACIÓN ---
-ADMIN_USERNAME = "profesor"
-ADMIN_PASSWORD = "1234"  # Puedes cambiarla a algo más seguro
+st.set_page_config(page_title="Examen Unidad 1", layout="centered")
 
-# --- LOGIN SIMPLE ---
-st.title("Ingreso a la Herramienta de Evaluación")
+st.title("Examen Unidad 1 – Fundamentos de Programación Orientada a Objetos")
+st.write("**Profesor:** Dr. Rodrigo Delgadillo Gaytán")
 
-rol = st.radio("Selecciona tu rol:", ["Estudiante", "Profesor"])
+# Verificación de sesión para envío único
+if 'enviado' not in st.session_state:
+    st.session_state['enviado'] = False
 
-if rol == "Profesor":
-    username = st.text_input("Usuario:")
-    password = st.text_input("Contraseña:", type="password")
-    if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-        st.success("Acceso concedido como profesor.")
-        
-        # Mostrar resultados si existen
-        archivo = "respuestas_evaluacion.csv"
-        if os.path.exists(archivo):
-            df = pd.read_csv(archivo)
-            st.subheader("Respuestas registradas:")
-            st.dataframe(df)
+# Nombre del alumno
+nombre = st.text_input("Ingresa tu nombre completo para comenzar el examen:")
 
-            with open(archivo, "rb") as f:
-                st.download_button(
-                    label="📥 Descargar respuestas en CSV",
-                    data=f,
-                    file_name="respuestas_evaluacion.csv",
-                    mime="text/csv"
-                )
-        else:
-            st.info("Aún no hay respuestas registradas.")
+if nombre:
+    st.success("¡Bienvenido/a, {}! A continuación, responde el examen:".format(nombre))
 
-    elif username or password:
-        st.error("Credenciales incorrectas.")
-
-elif rol == "Estudiante":
-    st.subheader("Formulario de evaluación")
-    nombre = st.text_input("Escribe tu nombre completo:")
-
-    if nombre.strip():
-        st.markdown("**Escala de respuesta:**")
-        st.markdown("1 = Totalmente en desacuerdo &nbsp;&nbsp; 2 = Parcialmente en desacuerdo &nbsp;&nbsp; 3 = Indiferente &nbsp;&nbsp; 4 = Parcialmente de acuerdo &nbsp;&nbsp; 5 = Totalmente de acuerdo", unsafe_allow_html=True)
-
-        preguntas = {
-            "Trabajo en equipo": [
-                "Cuando trabajo en equipo, me esfuerzo por escuchar y respetar las ideas de mis compañeros.",
-                "Participo activamente en las actividades grupales y cumplo con mis responsabilidades.",
-                "Puedo comunicar claramente mis ideas hacia mis compañeros de equipo.",
-                "Suelto intervenir de manera asertiva en los conflictos dentro del equipo para resolverlos."
-            ],
-            "Trabajo autónomo en casa": [
-                "Completo las tareas escolares en tiempo y forma.",
-                "Busco recursos o soluciones por mi cuenta para resolver las dudas que tengo antes de pedir ayuda.",
-                "Estudio material de clase constantemente."
-            ],
-            "Comprensión lectora": [
-                "Puedo identificar las ideas principales y los detalles importantes en los textos que leo.",
-                "Comprendo instrucciones escritas sin necesidad de explicaciones adicionales.",
-                "Después de leer un texto, puedo resumirlo con mis propias palabras de forma clara."
+    # Preguntas de opción múltiple
+    preguntas = [
+        {
+            "texto": "1. ¿A qué concepto nos referimos cuando hablamos de un modelo o estilo de programación que guía la forma en que se estructura y organiza el código?",
+            "opciones": ["Sintaxis", "Compilador", "Paradigma de programación", "Entorno de desarrollo"]
+        },
+        {
+            "texto": "2. ¿Cuál de las siguientes opciones describe mejor la programación imperativa?",
+            "opciones": [
+                "Un estilo que se enfoca en lo que debe hacerse, no en cómo",
+                "Un enfoque donde se describe paso a paso cómo debe ejecutarse una tarea",
+                "Un modelo basado en lógica matemática",
+                "Un paradigma centrado en la interfaz gráfica del usuario"
+            ]
+        },
+        {
+            "texto": "3. ¿Cuál de los siguientes NO es un paradigma de programación?",
+            "opciones": ["Imperativa", "Funcional", "Compilada", "Orientada a objetos"]
+        },
+        {
+            "texto": "4. ¿Qué es la programación visual?",
+            "opciones": [
+                "Programación visual",
+                "Programación funcional",
+                "Programación declarativa",
+                "Programación estructurada"
+            ]
+        },
+        {
+            "texto": "5. ¿Cuál de las siguientes opciones corresponde al paradigma que organiza el código en clases y objetos?",
+            "opciones": [
+                "Programación estructurada",
+                "Programación funcional",
+                "Programación orientada a objetos",
+                "Programación visual"
+            ]
+        },
+        {
+            "texto": "6. ¿Qué es un entorno visual de desarrollo?",
+            "opciones": [
+                "Un lenguaje de programación para interfaces",
+                "Una forma de programar sin código",
+                "Una herramienta para diseñar y programar visualmente",
+                "Un sistema operativo especializado para programación"
+            ]
+        },
+        {
+            "texto": "7. ¿Cuáles son los cuatro pilares de la programación orientada a objetos?",
+            "opciones": [
+                "Funciones, métodos, atributos, operadores",
+                "Herencia, encapsulamiento, polimorfismo, abstracción",
+                "Visualización, compilación, modelado, ejecución",
+                "Clases, objetos, métodos, estructuras"
+            ]
+        },
+        {
+            "texto": "8. ¿Qué es la herencia?",
+            "opciones": ["Encapsulamiento", "Abstracción", "Herencia", "Polimorfismo"]
+        },
+        {
+            "texto": "9. ¿Qué opción describe mejor el polimorfismo?",
+            "opciones": [
+                "El proceso de ocultar datos",
+                "La capacidad de una clase para definirse dentro de otra",
+                "Capacidad de un objeto para tener diferentes comportamientos con el mismo método",
+                "La reutilización de código mediante ciclos"
             ]
         }
+    ]
 
-        respuestas = {"Nombre": nombre}
-        for categoria, items in preguntas.items():
-            st.subheader(categoria)
-            for pregunta in items:
-                respuesta = st.radio(pregunta, [1, 2, 3, 4, 5], key=pregunta)
-                respuestas[pregunta] = respuesta
+    respuestas = []
+    for idx, pregunta in enumerate(preguntas):
+        respuesta = st.radio(pregunta["texto"], pregunta["opciones"], key=f"pregunta_{idx}")
+        respuestas.append(respuesta)
 
-        if st.button("Enviar respuestas"):
-            archivo = "respuestas_evaluacion.csv"
-            nueva_respuesta = pd.DataFrame([respuestas])
-            if os.path.exists(archivo):
-                datos_existentes = pd.read_csv(archivo)
-                datos_combinados = pd.concat([datos_existentes, nueva_respuesta], ignore_index=True)
-            else:
-                datos_combinados = nueva_respuesta
-            datos_combinados.to_csv(archivo, index=False)
-            st.success("¡Respuestas enviadas exitosamente!")
-    else:
-        st.info("Por favor, ingresa tu nombre para comenzar.")
+    # Preguntas abiertas
+    st.markdown("### 10. Conceptos y ejemplos")
+    st.info("Define con tus propias palabras y da un ejemplo de: Clase, Objeto, Atributo y Método.\n\nEscríbelo en una hoja libre y entrégalo al final.")
+    pregunta_10_ok = st.checkbox("He completado la pregunta 10 en hoja libre.")
+
+    st.markdown("### 11. Modelo conceptual con herencia")
+    st.info("Diseña un modelo con una clase padre (3 atributos, 2 métodos) y dos clases hijas (cada una con 1 atributo y 1 método). Entrégalo en hoja libre.")
+    pregunta_11_ok = st.checkbox("He completado la pregunta 11 en hoja libre.")
+
+    # Botón de enviar
+    if st.button("Terminar examen"):
+        if st.session_state['enviado']:
+            st.warning("Ya enviaste el examen en esta sesión.")
+        else:
+            # Guardar respuestas
+            datos = {
+                "Nombre": nombre,
+                "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            for i, r in enumerate(respuestas, 1):
+                datos[f"Pregunta_{i}"] = r
+            datos["Pregunta_10_OK"] = "Sí" if pregunta_10_ok else "No"
+            datos["Pregunta_11_OK"] = "Sí" if pregunta_11_ok else "No"
+
+            # Guardar en archivo CSV
+            df = pd.DataFrame([datos])
+            try:
+                df_ant = pd.read_csv("respuestas_examen.csv")
+                df = pd.concat([df_ant, df], ignore_index=True)
+            except FileNotFoundError:
+                pass
+            df.to_csv("respuestas_examen.csv", index=False)
+
+            st.success("✅ ¡Examen enviado con éxito! Puedes entregar tus respuestas escritas.")
+            st.session_state['enviado'] = True
+else:
+    st.warning("Por favor, escribe tu nombre completo para comenzar el examen.")
